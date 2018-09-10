@@ -14,6 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * security配置
@@ -36,8 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * 1 配置Spring Security的Filter链 web.addSecurityFilterChainBuilder(securityFilterChainBuilder) 
-     * 2 配置哪些东西不需要拦截
+     * 1 配置Spring Security的Filter链 web.addSecurityFilterChainBuilder(securityFilterChainBuilder) 2 配置哪些东西不需要拦截
      */
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -51,33 +53,43 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
-//        http
+        http
 //            .addFilterBefore(new AuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
-//            .exceptionHandling()
-//            .authenticationEntryPoint(unauthorizedEntryPoint())
-//        .and()
-//            .csrf()
-//            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//        .and()
-//            .formLogin()
-//            .loginProcessingUrl("/anonymity/api/authentication")
-//            .successHandler(authenticationSuccessHandler())
-//            .failureHandler(authenticationFailureHandler())
-//            .usernameParameter("j_username")
-//            .passwordParameter("j_password")
-//            .permitAll()
-//        .and()
-//            .logout()
-//            .logoutUrl("/api/logout")
-//            .logoutSuccessHandler(logoutSuccessHandler())
-//            .deleteCookies("JSESSIONID", "XSRF-TOKEN", "token")
-//            .permitAll()
-//        .and()
-//            .authorizeRequests()
-//            .antMatchers("/anonymity/api/authenticate").permitAll()
-//            .antMatchers("/api/**").authenticated()
-//            .antMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN);
+            .exceptionHandling()
+            .authenticationEntryPoint(unauthorizedEntryPoint())
+        .and()
+            .csrf()
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        .and()
+            .formLogin()
+            .loginProcessingUrl("/anonymity/api/authentication")
+            .successHandler(authenticationSuccessHandler())
+            .failureHandler(authenticationFailureHandler())
+            .usernameParameter("j_username")
+            .passwordParameter("j_password")
+            .permitAll()
+        .and()
+            .logout()
+            .logoutUrl("/api/logout")
+            .logoutSuccessHandler(logoutSuccessHandler())
+            .deleteCookies("JSESSIONID", "XSRF-TOKEN", "token")
+            .permitAll()
+        .and()
+            .authorizeRequests()
+            .antMatchers("/anonymity/api/authenticate").permitAll()
+            .antMatchers("/api/**").authenticated()
+            .antMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN);
         // @formatter:on
+    }
+
+    /**
+     * 构建登录成功处理器。
+     *
+     * @return 登录成功处理器
+     */
+    @Bean
+    public LogoutSuccessHandler logoutSuccessHandler() {
+        return (request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK);
     }
 
     /**
