@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/anonymity/api/v1")
-public class AnonymityHelloContorller {
+@RequestMapping("/api/admin/v1")
+public class AdminHelloController {
 
     @GetMapping(path = "/hello")
-    public String anonymityHello() {
-        return "anonymity hello";
+    public String hello() {
+        return "admin hello";
     }
+
 }
