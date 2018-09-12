@@ -3,6 +3,7 @@ package com.zzy.security.config;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -18,6 +19,10 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import com.zzy.security.security.authentication.MyAuthenticationProvider;
+import com.zzy.security.security.authentication.TokenAuthenticationProvider;
+import com.zzy.security.security.filter.TokenFilter;
+
 /**
  * security配置
  */
@@ -26,15 +31,21 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private MyAuthenticationProvider myAuthenticationProvider;
+
+    @Autowired
+    private TokenAuthenticationProvider tokenAuthenticationProvider;
+
     /**
      * 构建AuthenticationManager
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // @formatter:off
-//        auth
-//            .authenticationProvider(usernameAndPasswordAuthenticationProvider)
-//            .authenticationProvider(tokenAuthenticationProvider);
+        auth
+            .authenticationProvider(tokenAuthenticationProvider)
+            .authenticationProvider(myAuthenticationProvider);
         // @formatter:on
     }
 
@@ -54,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         // @formatter:off
         http
-//            .addFilterBefore(new AuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class)
+            .addFilterBefore(new TokenFilter(authenticationManager()), BasicAuthenticationFilter.class)
             .exceptionHandling()
             .authenticationEntryPoint(unauthorizedEntryPoint())
         .and()
